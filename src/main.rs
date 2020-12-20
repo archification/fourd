@@ -1,13 +1,14 @@
+extern crate rand;
+
 use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::rect::{Point};
+use rand::Rng;
 
 type Vec3 = [f64; 3];
 type Vec4 = [f64; 4];
 type Mat4x4 = [Vec4; 4];
 
-const BACKGROUND: Color = Color::RGB(18, 18, 18);
-const FOREGROUND: Color = Color::RGB(255, 150, 150);
 const DISTANCE: f64 = 5.0;
 
 fn dot_4d_vv(v1: Vec4, v2: Vec4) -> f64 {
@@ -114,7 +115,11 @@ fn main() -> Result<(), String> {
 
         }
 
-        canvas.set_draw_color(BACKGROUND);
+        let mut rng = rand::thread_rng();
+        let (r, g, b): (u8, u8, u8) = rng.gen();
+        let (x, y, z): (u8, u8, u8) = rng.gen();
+
+        canvas.set_draw_color(Color::RGB(r, g, b));
         canvas.clear();
         let (w, h) = canvas.window().size();
         const LOW_RANGE: f64 = -1.0;
@@ -161,7 +166,7 @@ fn main() -> Result<(), String> {
                                                 [0.0, 0.0, DISTANCE, 0.0])), r),
                                     w as f64, h as f64);
 
-                                canvas.set_draw_color(FOREGROUND);
+                                canvas.set_draw_color(Color::RGB(x, y, z));
                                 canvas.draw_line(Point::new(ps1[0] as i32, ps1[1] as i32),
                                                  Point::new(ps2[0] as i32, ps2[1] as i32))?;
                             }
