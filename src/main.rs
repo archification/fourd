@@ -50,14 +50,6 @@ fn project_3d_to_2d_persp([x, y, z]: Vec3, r: f64) -> [f64; 2] {
     return [x * r / z, y / z];
 }
 
-fn project_3d_to_2d_ortho([x, y, _]: Vec3, r: f64) -> [f64; 2] {
-    return [x * r, y];
-}
-
-fn project_4d_to_3d_persp([x, y, z, u]: Vec4) -> Vec3 {
-    return [x / u, y / u, z / u];
-}
-
 fn project_4d_to_3d_ortho([x, y, z, u]: Vec4) -> Vec3 {
     return [x, y, z + u];
 }
@@ -70,27 +62,8 @@ fn to_screen([x0, y0]: [f64; 2], w: f64, h: f64) -> [f64; 2] {
     [x, y]
 }
 
-fn translate_3d([x0, y0, z0]: Vec3, [x1, y1, z1]: Vec3) -> Vec3 {
-    return [x0 + x1, y0 + y1, z0 + z1];
-}
-
 fn translate_4d([x0, y0, z0, u0]: Vec4, [x1, y1, z1, u1]: Vec4) -> Vec4 {
     return [x0 + x1, y0 + y1, z0 + z1, u0 + u1];
-}
-
-fn rotate_y_3d([x0, y0, z0]: Vec3, theta: f64) -> Vec3 {
-    let x1 = x0 * f64::cos(theta) + z0 * f64::sin(theta);
-    let z1 = x0 * f64::sin(theta) - z0 * f64::cos(theta);
-    return [x1, y0, z1];
-}
-
-fn id_4d() -> Mat4x4 {
-    [
-        [1.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
-        [0.0, 0.0, 0.0, 1.0],
-    ]
 }
 
 fn rotmat_4d_xz(theta: f64) -> Mat4x4 {
@@ -99,24 +72,6 @@ fn rotmat_4d_xz(theta: f64) -> Mat4x4 {
         [0.0             , 1.0, 0.0, 0.0],
         [f64::sin(theta) , 0.0, f64::cos(theta), 0.0],
         [0.0             , 0.0, 0.0, 1.0],
-    ]
-}
-
-fn rotmat_4d_xu(theta: f64) -> Mat4x4 {
-    [
-        [f64::cos(theta), 0.0, 0.0, f64::sin(theta)],
-        [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
-        [-f64::sin(theta), 0.0, 0.0, f64::cos(theta)],
-    ]
-}
-
-fn rotmat_4d_yu(theta: f64) -> Mat4x4 {
-    [
-        [1.0, 0.0, 0.0, 0.0],
-        [0.0, f64::cos(theta), 0.0, -f64::sin(theta)],
-        [0.0, 0.0, 1.0, 0.0],
-        [0.0, f64::sin(theta), 0.0, f64::cos(theta)],
     ]
 }
 
@@ -162,30 +117,29 @@ fn main() -> Result<(), String> {
         canvas.set_draw_color(BACKGROUND);
         canvas.clear();
         let (w, h) = canvas.window().size();
-        const low_range: f64 = -1.0;
-        const high_range: f64 = 1.0;
-        const SIZE: f64 = 10.0;
+        const LOW_RANGE: f64 = -1.0;
+        const HIGH_RANGE: f64 = 1.0;
         const N: u32 = 2;
         const D: usize = 4;
-        const ds: f64 = (high_range - low_range) / (N - 1) as f64;
+        const DS: f64 = (HIGH_RANGE - LOW_RANGE) / (N - 1) as f64;
         // TODO: make D affect the amount of nested loops and stuff
         for ix in 0..N {
             for iy in 0..N {
                 for iz in 0..N {
                     for iw in 0..N {
-                        let p1 = [low_range + ix as f64 * ds,
-                                  low_range + iy as f64 * ds,
-                                  low_range + iz as f64 * ds,
-                                  low_range + iw as f64 * ds];
+                        let p1 = [LOW_RANGE + ix as f64 * DS,
+                                  LOW_RANGE + iy as f64 * DS,
+                                  LOW_RANGE + iz as f64 * DS,
+                                  LOW_RANGE + iw as f64 * DS];
 
                         for id in 0..D {
                             let p2 = {
                                 let mut t = p1.clone();
-                                t[id] += ds;
+                                t[id] += DS;
                                 t
                             };
 
-                            if p2[id] <= high_range {
+                            if p2[id] <= HIGH_RANGE {
                                 let r = h as f64 / w as f64;
                                 let rotmat =
                                     dot_4d_mm(
